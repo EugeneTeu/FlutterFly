@@ -1,19 +1,24 @@
+import 'dart:io';
 import 'dart:ui';
 
+// import 'package:flutter/material.dart';
 import 'package:flame/game.dart';
-import 'package:trex/game/Horizon/horizon.dart';
+import 'package:trex/game/horizon/horizon.dart';
 import 'package:trex/game/collision/collision_utils.dart';
 import 'package:trex/game/game_config.dart';
 import 'package:trex/game/game_over/game_over.dart';
 import 'package:trex/game/t_rex/config.dart';
 import 'package:trex/game/t_rex/t_rex.dart';
+import 'package:trex/game/collision/popup.dart';
 
 enum TRexGameStatus { playing, waiting, gameOver }
-
 class TRexGame extends BaseGame {
+  final int limit = 3;
+  int count = 1;
   TRex tRex;
   Horizon horizon;
   GameOverPanel gameOverPanel;
+  QuestionPanel questionPanel;
   TRexGameStatus status = TRexGameStatus.waiting;
 
   double currentSpeed = GameConfig.speed;
@@ -58,11 +63,20 @@ class TRexGame extends BaseGame {
       if (!collision) {
         if (this.currentSpeed < GameConfig.maxSpeed) {
           this.currentSpeed += GameConfig.acceleration;
-        }
+        } 
+      } else if (popUp() && count <= limit) {
+        count += 1;
       } else {
         doGameOver();
       }
     }
+  }
+
+  bool popUp() {
+    questionPanel = new QuestionPanel();
+    questionPanel.visible = true;
+    sleep(new Duration(seconds: 2));
+    return true;
   }
 
   void startGame() {
@@ -76,6 +90,7 @@ class TRexGame extends BaseGame {
 
   void doGameOver() {
     this.gameOverPanel.visible = true;
+    // showQuestion();
     stop();
     tRex.status = TRexStatus.crashed;
   }
